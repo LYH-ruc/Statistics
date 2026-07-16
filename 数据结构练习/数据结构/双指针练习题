@@ -1,0 +1,50 @@
+def delete(nums):
+    slow = 0
+    for fast in range(len(nums)):
+        if nums[fast] != nums[slow]:
+            slow += 1
+            nums[slow] = nums[fast]
+    return slow + 1
+def drain(height):
+    left,right = 0,len(height)-1
+    s = 0
+    while left < right:
+        area = min(height[left], height[right]) * (right - left)
+        s = max(s, area)
+        if height[left] < height[right]:
+            left += 1
+        elif height[left] > height[right]:
+            right -= 1
+        else:
+            left += 1
+            right -= 1
+    return s
+height = [1,8,6,2,5,4,8,3,7]
+print(drain(height))
+#滑动窗口
+#求最小
+def minSubArrayLen(target, nums):
+    left = 0
+    window = 0
+    res = float('inf')
+    for right in range(len(nums)):
+        window += nums[right]
+        while window >= target:
+            res = min(res,right-left+1)
+            window -= nums[left]
+            left += 1
+    return res if res != float('inf') else 0
+#求最大
+def maxSubArrayLen(nums):
+    left = 0
+    window = set()
+    res = 0
+    for right in range(len(nums)):
+        while nums[right] in window:
+            window.remove(nums[left])
+            left += 1
+        window.add(nums[right])
+        res = max(res, right - left + 1)
+    return res
+
+

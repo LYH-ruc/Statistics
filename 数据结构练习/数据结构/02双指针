@@ -1,0 +1,297 @@
+# 双指针
+
+## 一句话定位
+
+双指针 = 用两个变量协同移动代替双层循环，把 O(n²) 降到 O(n)。
+
+---
+
+## 写代码前的检查清单
+
+1. 空输入怎么办？（数组空、字符串空、长度小于 2）
+2. 每个函数必须有兜底 return
+3. 风格统一——同题不要既用 continue 又用 if/elif/else
+4. 能不能加剪枝？（提前 break 跳过不可能的情况）
+5. 能不能优化常数？（交换替代两遍循环）
+
+---
+
+## 三种模式
+
+### 模式 A：对撞指针（左右向中间）
+
+**触发信号**：
+- 数组已排序
+- 找两数关系（和、差、乘积）
+- 判断回文
+- 两端向中间收缩
+
+**移动逻辑**：
+- 太小 → `left += 1`（让和变大）
+- 太大 → `right -= 1`（让和变小）
+
+### 模式 B：快慢指针（同向不同速）
+
+**触发信号**：
+- 原地修改数组
+- 删除元素 / 去重 / 移动元素
+- 链表找中点 / 判环（后续课程）
+
+**核心心法**：
+- slow 管"结果区"
+- fast 负责"扫描"
+
+### 模式 C：滑动窗口
+
+下一课讲。
+
+---
+
+## 模板代码
+
+### 模板 1：快慢指针 - 移除元素
+
+​```python
+def removeElement(nums, val):
+    slow = 0
+    for fast in range(len(nums)):
+        if nums[fast] != val:
+            nums[slow] = nums[fast]
+            slow += 1
+    return slow
+​```
+
+**复杂度**：时间 O(n)，空间 O(1)
+
+**关键点**：
+- slow 指向"下一个填的位置"
+- return slow（slow 本身就是新长度）
+
+---
+
+### 模板 2：快慢指针 - 移动零（基础版）
+
+​```python
+def moveZeroes(nums):
+    slow = 0
+    for fast in range(len(nums)):
+        if nums[fast] != 0:
+            nums[slow] = nums[fast]
+            slow += 1
+    for i in range(slow, len(nums)):
+        nums[i] = 0
+​```
+
+**复杂度**：时间 O(n)，空间 O(1)
+
+### 模板 2 进阶：移动零（交换版）
+
+​```python
+def moveZeroes(nums):
+    slow = 0
+    for fast in range(len(nums)):
+        if nums[fast] != 0:
+            nums[slow], nums[fast] = nums[fast], nums[slow]
+            slow += 1
+​```
+
+**优势**：只扫一遍，常数更小。
+
+---
+
+### 模板 3：快慢指针 - 删除有序数组重复项
+
+​```python
+def removeDuplicates(nums):
+    if not nums:
+        return 0
+    slow = 0
+    for fast in range(len(nums)):
+        if nums[fast] != nums[slow]:
+            slow += 1
+            nums[slow] = nums[fast]
+    return slow + 1
+​```
+
+**复杂度**：时间 O(n)，空间 O(1)
+
+**关键点**：
+- slow 指向"已放好的最后一个位置"
+- return slow + 1（不是 slow）
+
+---
+
+### 模板 4：对撞指针 - 反转字符串
+
+​```python
+def reverseString(s):
+    left, right = 0, len(s) - 1
+    while left < right:
+        s[left], s[right] = s[right], s[left]
+        left += 1
+        right -= 1
+​```
+
+**复杂度**：时间 O(n)，空间 O(1)
+
+---
+
+### 模板 5：对撞指针 - 验证回文串
+
+​```python
+def isPalindrome(s):
+    left, right = 0, len(s) - 1
+    while left < right:
+        while left < right and not s[left].isalnum():
+            left += 1
+        while left < right and not s[right].isalnum():
+            right -= 1
+        if s[left].lower() != s[right].lower():
+            return False
+        left += 1
+        right -= 1
+    return True
+​```
+
+**复杂度**：时间 O(n)，空间 O(1)
+
+**Python 工具**：
+- `s[i].isalnum()` → 是不是字母或数字
+- `s[i].lower()` → 转小写
+
+---
+
+### 模板 6：对撞指针 - 两数之和 II（已排序）
+
+​```python
+def twoSum(numbers, target):
+    left, right = 0, len(numbers) - 1
+    while left < right:
+        s = numbers[left] + numbers[right]
+        if s == target:
+            return [left + 1, right + 1]
+        elif s < target:
+            left += 1
+        else:
+            right -= 1
+    return []
+​```
+
+**复杂度**：时间 O(n)，空间 O(1)
+
+---
+
+### 模板 7：for + 对撞指针 - 三数之和
+
+​```python
+def threeSum(nums):
+    nums.sort()
+    result = []
+    for i in range(len(nums) - 2):
+        if nums[i] > 0:
+            break
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue
+        left, right = i + 1, len(nums) - 1
+        while left < right:
+            s = nums[left] + nums[right]
+            if s == -nums[i]:
+                result.append([nums[i], nums[left], nums[right]])
+                while left < right and nums[left] == nums[left + 1]:
+                    left += 1
+                while left < right and nums[right] == nums[right - 1]:
+                    right -= 1
+                left += 1
+                right -= 1
+            elif s < -nums[i]:
+                left += 1
+            else:
+                right -= 1
+    return result
+​```
+
+**复杂度**：时间 O(n²)，空间 O(log n)
+
+**核心思想**：固定一个数 → 3 数之和降维为 2 数之和
+
+**三处去重 + 一处剪枝**：
+1. 剪枝：`if nums[i] > 0: break`
+2. 去重 i：`if i > 0 and nums[i] == nums[i-1]: continue`
+3. 去重 left
+4. 去重 right
+
+---
+
+## 面试时的"思考脚本"
+
+1. 数组是否有序？→ 有序 + 找两数关系 = 对撞指针
+2. 是否要原地修改？→ 是 = 快慢指针
+3. 是否需要"看子串/子数组"？→ 滑动窗口
+4. 暴力解是 O(n²)？→ 思考能否双指针降到 O(n)
+
+---
+
+## 复杂度速答
+
+| 模板 | 时间 | 空间 |
+|---|---|---|
+| 快慢指针（模板 1-3） | O(n) | O(1) |
+| 对撞指针（模板 4-6） | O(n) | O(1) |
+| for + 对撞（模板 7） | O(n²) | O(log n) |
+
+**面试加分点**：sort() 用的是 Timsort，递归栈 O(log n)。
+
+---
+
+## 易错点
+
+### 1. nums = nums.sort() 让 nums 变成 None
+
+​```python
+nums.sort()              # ✓ 原地排序
+nums = sorted(nums)      # ✓ 用 sorted 函数
+nums = nums.sort()       # ❌ nums 变成 None
+​```
+
+### 2. pop(0) 是 O(n)
+
+​```python
+arr.pop(0)               # ❌ O(n)
+collections.deque        # ✓ popleft() 是 O(1)
+​```
+
+### 3. x in list 是 O(n)
+
+​```python
+x in [...]              # ❌ O(n)
+x in {...}              # ✓ O(1)
+​```
+
+### 4. 切片是复制
+
+​```python
+arr[1:]                 # 创建新数组，O(n) 时间 + O(n) 空间
+​```
+
+### 5. removeDuplicates 返回 slow + 1，不是 slow
+
+| 题 | slow 的含义 | return |
+|---|---|---|
+| removeElement | 下一个填的位置 | slow |
+| removeDuplicates | 已放好的最后位置 | slow + 1 |
+
+---
+
+## Python list 复杂度速查
+
+| 操作 | 写法 | 时间 |
+|---|---|---|
+| 按下标读/写 | arr[i] | O(1) |
+| 末尾追加 | arr.append(x) | O(1) |
+| 末尾弹出 | arr.pop() | O(1) |
+| 开头插入 | arr.insert(0, x) | O(n) ⚠️ |
+| 开头弹出 | arr.pop(0) | O(n) ⚠️ |
+| 中间插入/删除 | arr.insert(i, x) | O(n) |
+| 查找元素 | x in arr | O(n) |
+| 长度 | len(arr) | O(1) |
+| 切片 | arr[i:j] | O(j-i) ⚠️ |

@@ -1,0 +1,324 @@
+# 双指针代码模板以及常见LC
+
+## A.对撞指针
+```python
+def 对撞指针模板(nums):
+    left,right = 0, len(nums)-1
+    while left < right:
+        输入需要的条件
+        根据合适的条件进行return
+        合适的情况下可以：
+        left += 1
+        right -= 1
+    return xxxx
+```
+###1. 反转字符串（LC 344）
+题目：编写一个函数，反转输入的字符串。输入字符串以字符数组 s 的形式给出。
+必须原地修改输入数组、使用 O(1) 的额外空间解决这一问题。
+示例：
+
+输入：s = ["h","e","l","l","o"]      → 输出：["o","l","l","e","h"]
+输入：s = ["H","a","n","n","a","h"]  → 输出：["h","a","n","n","a","H"]
+```python
+def reverseString(s):
+    left,right = 0, len(s)-1
+    while left < right:
+        s[left],s[right] = s[right],s[left]
+        left += 1
+        right -= 1
+```
+### 2. 验证回文串（LC 125）
+题目：如果在将所有大写字符转换为小写字符、并移除所有非字母数字字符之后，短语正着读和反着读都一样，则可以认为该短语是一个回文串。
+给你一个字符串 s，如果它是回文串，返回 true；否则，返回 false。
+字母和数字都属于字母数字字符。
+示例：
+
+输入：s = "A man, a plan, a canal: Panama"  → true（"amanaplanacanalpanama"）
+输入：s = "race a car"                       → false
+输入：s = " "                                → true（空串视为回文）
+```python
+def isPalindrome(s):
+    left,right = 0, len(s)-1
+    while left < right:
+        if not s[left].isalnum():
+            left += 1
+            continue
+        elif not s[right].isalnum():
+            right -= 1
+            continue
+        elif s[left].lower() != s[right].lower():
+            return False
+        else:
+            left += 1
+            right -= 1
+    return True
+```
+### 两数之和 II - 输入有序数组（LC 167）
+题目：给你一个下标从 1 开始的整数数组 numbers，该数组已按非递减顺序排列。请你从数组中找出满足相加之和等于目标数 target 的两个数。
+返回这两个数的下标值（下标从 1 开始）。
+每个输入只对应唯一答案，不可以重复使用相同的元素。
+示例：
+
+输入：numbers = [2,7,11,15], target = 9  → [1,2]
+输入：numbers = [2,3,4], target = 6      → [1,3]
+输入：numbers = [-1,0], target = -1      → [1,2]
+```python
+def twoSum(nums, target):
+    left,right = 0, len(nums)-1
+    while left < right:
+        s = numbers[left] +numbers[right]
+        if s < target:
+            left += 1
+        elif s > target:
+            right -= 1
+        else:
+            return [left+1,right+1]
+
+```
+### 三数之和（LC 15）
+题目：给你一个整数数组 nums，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k，同时还满足 nums[i] + nums[j] + nums[k] == 0。
+请返回所有和为 0 且不重复的三元组。
+示例：
+
+输入：nums = [-1,0,1,2,-1,-4]  → [[-1,-1,2],[-1,0,1]]
+输入：nums = [0,1,1]            → []
+输入：nums = [0,0,0]            → [[0,0,0]]
+```python
+def threeSum(nums):
+    nums.sort()
+    result = []
+    for i in range(len(nums) - 2):
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue
+        left, right = i + 1, len(nums) - 1 
+        while left < right:
+            if nums[left]+nums[right] == -nums[i]:
+                result.append([nums[i], nums[left], nums[right]])
+                while left < right and nums[left] == nums[left + 1]:
+                    left += 1
+                while left < right and nums[right] == nums[right - 1]:
+                    right -= 1
+                left += 1
+                right -= 1
+            elif nums[left]+nums[right] < -nums[i]:
+                left += 1
+            else:
+                right -= 1
+    return result
+```
+        
+
+
+---
+
+## B.快慢指针
+```python
+def 快慢指针模板(nums):
+    slow = 0
+    for fast in range(len(nums)):
+        输入需要的条件
+        根据合适的条件进行return        
+```
+
+### 1. 移除元素（LC 27）
+题目：给你一个数组 nums 和一个值 val，你需要**原地**移除所有数值等于 val 的元素，并返回移除后数组的新长度。
+
+不要使用额外的数组空间，你必须仅使用 O(1) 额外空间并**原地修改输入数组**。
+
+元素的顺序可以改变。你不需要考虑数组中超出新长度后面的元素。
+
+示例：
+- 输入：nums = [3,2,2,3], val = 3      → 返回 2，nums = [2,2,_,_]
+- 输入：nums = [0,1,2,2,3,0,4,2], val = 2  → 返回 5，nums = [0,1,3,0,4,_,_,_]
+
+```python
+def removeElement(nums, val):
+    slow = 0
+    for fast in range(len(nums)):
+        if nums[fast] != val:
+            nums[slow] = nums[fast]
+            slow += 1
+    return slow
+```
+
+### 2. 移动零（LC 283）
+题目：给定一个数组 nums，编写一个函数将所有 0 移动到数组的**末尾**，同时保持非零元素的**相对顺序**。
+
+请注意，必须在不复制数组的情况下**原地**对数组进行操作。
+
+示例：
+- 输入：nums = [0,1,0,3,12]   → nums = [1,3,12,0,0]
+- 输入：nums = [0]            → nums = [0]
+
+```python
+def moveZeroes(nums):
+    slow = 0
+    for fast in range(len(nums)):
+        if nums[fast] != 0:
+            nums[slow] = nums[fast]
+            slow += 1
+        for i in range(slow, len(nums)):
+            nums[i] = 0
+```
+
+### 3. 删除有序数组中的重复项（LC 26）
+题目：给你一个**升序排列**的数组 nums，请你**原地**删除重复出现的元素，使每个元素**只出现一次**，返回删除后数组的新长度。
+
+元素的相对顺序应该保持一致。然后返回 nums 中唯一元素的个数。
+
+示例：
+- 输入：nums = [1,1,2]                → 返回 2，nums = [1,2,_]
+- 输入：nums = [0,0,1,1,1,2,2,3,3,4]  → 返回 5，nums = [0,1,2,3,4,_,_,_,_,_]
+
+```python
+def removeDuplicates(nums):
+    slow = 0
+    for fast in range(1,len(nums)):
+        if nums[fast] != nums[slow]:
+            slow += 1
+            nums[slow] == nums[fast]
+    return slow + 1
+```
+## 滑动窗口
+### 滑动窗口的两个版型
+
+### 版型 A：求"最小"
+
+```python
+left = 0
+window_state = 0
+res = float('inf')
+
+for right in range(len(data)):
+    # 进窗口
+    window_state += ...
+    
+    # 满足条件 → 收缩 + 记答案
+    while 满足条件:
+        res = min(res, right - left + 1)
+        window_state -= ...
+        left += 1
+
+return res if res != float('inf') else 0
+```
+
+### 版型 B：求"最大"
+
+```python
+left = 0
+window_state = ...
+res = 0
+
+for right in range(len(data)):
+    # 进窗口（看具体题：是否要在 while 前进还是 while 后进）
+    ...
+    
+    # 非法 → 收缩
+    while 非法条件:
+        ...
+        left += 1
+    
+    # 记答案
+    res = max(res, right - left + 1)
+
+return res
+```
+
+### 1. 长度最小的子数组（LC 209）—— 求最小
+题目：给定一个含有 n 个**正整数**的数组和一个正整数 target，找出该数组中满足其**和大于等于 target** 的**长度最小的连续子数组**，并返回其长度。如果不存在符合条件的子数组，返回 0。
+
+示例：
+- 输入：target = 7, nums = [2,3,1,2,4,3]   → 2（子数组 [4,3]）
+- 输入：target = 4, nums = [1,4,4]          → 1
+- 输入：target = 11, nums = [1,1,1,1,1,1,1,1] → 0
+
+```python
+def minSubArrayLen(target, nums):
+    left = 0
+    window = 0
+    res = float('inf')
+    for right in range(len(nums)):
+        window += nums[right]
+        while window >= target:
+            res = min(res, right - left + 1)
+            window -= nums[left]
+            left += 1
+    return res if res != float('inf') else 0
+
+
+```
+
+### 2. 至少包含 k 个字符 c 的最短子串（自出题）—— 求最小
+题目：给你一个由小写字母组成的字符串 s、一个目标字母 c 和一个正整数 k。找出 s 中**包含至少 k 个 c 字母**的**最短连续子串**长度。如果不存在，返回 0。
+
+示例：
+- 输入：s = "aabcbcdbca", c = 'c', k = 2  → 3（如 "cbc"）
+- 输入：s = "aaaa", c = 'c', k = 1         → 0
+- 输入：s = "abcabc", c = 'c', k = 2       → 4（"cabc"）
+
+```python
+def minWindowKChars(s, c, k):
+    left = 0
+    window = 0
+    res = float('inf')
+    for right in range(len(s)):
+        if s[right] == c:
+            window += 1
+        while window >= k:
+            min_length = min(min_length, right - left + 1)
+            if s[left] == c:
+                count -= 1
+            left += 1
+    return min_length if min_length != float('inf') else -1
+
+```
+
+### 3. 无重复字符的最长子串（LC 3）—— 求最大
+题目：给定一个字符串 s，请你找出其中**不含有重复字符**的**最长子串**的长度。
+
+注意"子串"是**连续**的，"子序列"不是。
+
+示例：
+- 输入：s = "abcabcbb"  → 3（"abc"）
+- 输入：s = "bbbbb"     → 1
+- 输入：s = "pwwkew"    → 3（"wke"，不是 "pwke"）
+- 输入：s = ""           → 0
+
+```python
+def lengthOfLongestSubstring(s):
+    left = 0 
+    window = set()
+    res = 0
+    for right in range(len(s)):
+        while s[right] in window:
+            window.remove(s[left])
+            left += 1
+        window.add(s[right])
+        res = max(res, right - left + 1)
+    return res
+        
+```
+
+### 4. 最大连续 1 的个数 III（LC 1004）—— 求最大
+题目：给定一个由 **0 和 1 组成的数组** nums，你最多可以把 **k 个 0 翻转为 1**。返回翻转后**最长连续 1** 的子数组长度。
+
+示例：
+- 输入：nums = [1,1,1,0,0,0,1,1,1,1,0], k = 2  → 6
+- 输入：nums = [0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], k = 3 → 10
+- 输入：nums = [0,0,0,0], k = 2  → 2
+- 输入：nums = [1,1,1,1], k = 0  → 4
+
+```python
+def longestOnes(nums, k):
+    left = 0
+    count = 0
+    res = 0
+    for right in range(len(nums)):
+        if nums[right] == 0:
+            count += 1
+        while count > k:
+            if nums[left] == 0:
+                count -= 1
+            left += 1
+        res = max(res,right -left + 1)
+    return res
